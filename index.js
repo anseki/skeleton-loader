@@ -3,21 +3,23 @@
 var loaderUtils = require('loader-utils');
 
 module.exports = function(content, sourceMap) {
-  var options = loaderUtils.getLoaderConfig(this, 'skeletonLoader'),
+  var context = this,
+    options = loaderUtils.getLoaderConfig(context, 'skeletonLoader'),
     asyncCb;
 
   function getResult(content) {
-    return options.raw ? content : 'module.exports = ' + JSON.stringify(content) + ';';
+    return context.loaderIndex === 0 && options.toCode ?
+      'module.exports = ' + JSON.stringify(content) + ';' :
+      content;
   }
 
-  options.raw = typeof options.raw === 'boolean' ? options.raw : this.loaderIndex > 0;
   options.cacheable = typeof options.cacheable === 'boolean' ? options.cacheable : true;
-  options.cacheable && this.cacheable && this.cacheable();
+  options.cacheable && context.cacheable && context.cacheable();
 
   if (typeof options.procedure === 'function') {
     if (options.async) {
       // async mode
-      if (!(asyncCb = this.async())) {
+      if (!(asyncCb = context.async())) {
         throw new Error('Asynchronous mode is not allowed');
       }
       options.procedure(content, sourceMap, function(error, content, sourceMap) {
@@ -26,11 +28,11 @@ module.exports = function(content, sourceMap) {
         } else {
           asyncCb(null, getResult(content), sourceMap);
         }
-      }, this, options);
+      }, context, options);
       return null;
     }
     // sync mode
-    content = options.procedure(content, sourceMap, asyncCb, this, options);
+    content = options.procedure(content, sourceMap, asyncCb, context, options);
   }
 
   return getResult(content);

@@ -2,7 +2,7 @@
 
 Loader module for [webpack](http://webpack.github.io/) to execute your custom procedure. It works as your custom loader.
 
-By default, skeleton-loader only outputs the input content, it's similar to [raw-loader](https://github.com/webpack/raw-loader). When you specify a function, skeleton-loader executes your function with the input content, and outputs its result. The function does something, it might edit the content, it might parse the content and indicate something in a console, it might do anything else.
+By default, skeleton-loader only outputs the input content. When you specify a function, skeleton-loader executes your function with the input content, and outputs its result. The function does something, it might edit the content, it might parse the content and indicate something in a console, it might do anything else.
 
 That is, you can specify a function in webpack configuration instead of writing new custom loader.
 
@@ -54,7 +54,8 @@ module.exports = {
     procedure: function(content) {
       // Remove all elements for testing from HTML.
       return (content + '').replace(/<div class="test">[^]*?<\/div>/g, '');
-    }
+    },
+    toCode: true
   }
 };
 ```
@@ -77,7 +78,8 @@ module.exports = {
       console.log(appConfig.foo);
       appConfig.bar = 'PUBLISH';
       return appConfig;
-    }
+    },
+    toCode: true
   }
 };
 ```
@@ -129,7 +131,7 @@ For example:
 ```js
 // app.js
 
-var code = require('raw!skeleton?raw=false!./lib-a.js');
+var data = require('skeleton?toCode=true!./data.txt');
 ```
 
 ### `skeletonLoader`
@@ -168,8 +170,8 @@ For example:
 // app.js
 
 var
-  data1 = require('skeleton?config=optionsA!./file-1.json'),
-  data2 = require('skeleton?config=optionsB!./file-2.json');
+  data1 = require('skeleton?config=optionsA!./file-1.js'),
+  data2 = require('skeleton?config=optionsB!./file-2.js');
 // Or, you can specify these parameters in webpack configuration.
 ```
 
@@ -181,17 +183,13 @@ module.exports = {
   // options-A
   optionsA: {
     procedure: function(content) {
-      var data = JSON.parse(content);
-      data.foo = 'A';
-      return data;
+      return (content + '').replace(/foo/g, 'barA');
     }
   },
   // options-B
   optionsB: {
     procedure: function(content) {
-      var data = JSON.parse(content);
-      data.foo = 'B';
-      return data;
+      return (content + '').replace(/foo/g, 'barB');
     }
   }
 };
@@ -240,7 +238,7 @@ module.exports = {
       if (context.resourcePath === '/abc/resource.js') {
 
         // Change current option.
-        options.raw = true;
+        options.toCode = true;
       }
 
       // Return the content to output.
@@ -278,7 +276,7 @@ module.exports = {
     async: true, // Asynchronous mode
     procedure: function(content, sourceMap, callback) {
       // Do something asynchronously.
-      require('fs').readFile('foo-data.txt', function(error, data) {
+      require('fs').readFile('data.txt', function(error, data) {
         if (error) {
           // Failed
           callback(error);
@@ -292,29 +290,16 @@ module.exports = {
 };
 ```
 
-### `raw`
+### `toCode`
 
 *Type:* boolean  
-*Default:* Automatic
+*Default:* `false`
 
-This loader outputs a JavaScript code when it is specified as a final loader, otherwise it outputs a raw content for next loader that expects it to be given, automatically.  
-That is, when it is specified as a final loader, it works like that a `raw-loader` is chained to `loaders` list.  
-For example, the following two codes work same:
+When the content is not JavaScript code (e.g. HTML, CSS, JSON, etc.), a loader that is specified as a final loader has to convert the content to JavaScript code and output it to allow another code to import the content.  
+If `true` is specified for `toCode` option, the content is converted to JavaScript code.  
+If the loader is specified as not a final loader, this option is ignored (i.e. the content is not converted, and it is passed to next loader).
 
-```js
-// webpack.config.js
-
-module.exports = {
-  // ...
-  module: {
-    loaders: [
-      {test: /\.html$/, loaders: ['raw', 'skeleton']} // Actually, `raw` is unnecessary.
-      // skeleton-loader passes a raw HTML code to raw-loader,
-      // and raw-loader changes it to a JavaScript code and outputs it.
-    ]
-  }
-};
-```
+For example:
 
 ```js
 // webpack.config.js
@@ -323,15 +308,31 @@ module.exports = {
   // ...
   module: {
     loaders: [
-      {test: /\.html$/, loader: 'skeleton'}
-      // skeleton-loader outputs a JavaScript code.
+      // HTML code is converted to JavaScript string.
+      // It works same as raw-loader.
+      {test: /\.html$/, loader: 'skeleton?toCode=true'},
+
+      // JSON data is converted to JavaScript object.
+      // It works same as json-loader.
+      {test: /\.json$/, loader: 'skeleton?config=optJson'}
     ]
+  },
+  optJson: {
+    procedure: function(content) { return JSON.parse(content); },
+    toCode: true
   }
 };
 ```
 
-By default, it chooses the JavaScript code or the raw content automatically.  
-If `true` is specified for `raw` option, it chooses a raw content always. If `false` is specified for `raw` option, it chooses a JavaScript code always.
+```js
+// app.js
+
+var html = require('file.html');
+element.innerHTML = html;
+
+var obj = require('file.json');
+console.log(obj.array1[3]);
+```
 
 ### `cacheable`
 
