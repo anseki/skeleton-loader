@@ -1,0 +1,33 @@
+{
+  "name": "skeleton-loader",
+  "version": "0.0.1",
+  "title": "skeleton-loader",
+  "description": "Loader module for webpack to execute your custom procedure.",
+  "keywords": [
+    "webpack",
+    "loader",
+    "custom",
+    "function",
+    "instant",
+    "edit",
+    "content",
+    "modify"
+  ],
+  "dependencies": {
+    "loader-utils": "^0.2.16"
+  },
+  "devDependencies": {
+    "webpack": "^1.13.3"
+  },
+  "homepage": "https://github.com/anseki/skeleton-loader",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/anseki/skeleton-loader.git"
+  },
+  "bugs": "https://github.com/anseki/skeleton-loader/issues",
+  "license": "MIT",
+  "author": {
+    "name": "anseki",
+    "url": "https://github.com/anseki"
+  }
+}
