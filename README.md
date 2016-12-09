@@ -8,10 +8,10 @@ That is, you can specify a function in webpack configuration instead of writing 
 
 skeleton-loader is useful when:
 
-- You couldn't find a loader you want
-- You don't want to write a special loader for your project
-- You want to add something to the result of another loader
-- You want to do additional editing
+- You couldn't find a loader you want.
+- You don't want to write a special loader for your project.
+- You want to add something to the result of another loader.
+- You want to do additional editing.
 - etc.
 
 For example:
@@ -32,8 +32,8 @@ module.exports = {
   // skeleton-loader options
   skeletonLoader: {
     procedure: function(content) {
-      // Replace test library with real library.
-      return (content + '').replace(/require\('lib-a-test\.js'\)/g, 'require(\'lib-a.js\')');
+      // Change the input content, and output it.
+      return (content + '').replace(/foo/g, 'bar');
     }
   }
 };
