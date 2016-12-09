@@ -1,8 +1,10 @@
 # skeleton-loader
 
-Loader module for [webpack](http://webpack.github.io/) to execute your custom procedure.
+Loader module for [webpack](http://webpack.github.io/) to execute your custom procedure. It works as your custom loader.
 
 By default, skeleton-loader only outputs the input content, it's similar to [raw-loader](https://github.com/webpack/raw-loader). When you specify a function, skeleton-loader executes your function with the input content, and outputs its result. The function does something, it might edit the content, it might parse the content and indicate something in a console, it might do anything else.
+
+That is, you can specify a function in webpack configuration instead of writing new custom loader.
 
 skeleton-loader is useful when:
 
@@ -217,7 +219,7 @@ See: http://webpack.github.io/docs/loaders.html#loader-context
 Reference to current options.
 
 In synchronous mode (default), the function has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.  
-In asynchronous mode, the function has to call the `callback` function with the content (see [`async`](#async) option).
+In asynchronous mode, the function has to call the `callback` function with the content (see [`async`](#async) option). To return a SourceMap, the `callback` function must be called.
 
 For example:
 
