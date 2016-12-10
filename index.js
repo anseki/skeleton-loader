@@ -5,7 +5,7 @@ var loaderUtils = require('loader-utils');
 module.exports = function(content, sourceMap) {
   var context = this,
     options = loaderUtils.getLoaderConfig(context, 'skeletonLoader'),
-    asyncCb;
+    undef;
 
   function getResult(content) {
     return context.loaderIndex === 0 && options.toCode ?
@@ -17,22 +17,20 @@ module.exports = function(content, sourceMap) {
   options.cacheable && context.cacheable && context.cacheable();
 
   if (typeof options.procedure === 'function') {
-    if (options.async) {
-      // async mode
-      if (!(asyncCb = context.async())) {
+    content = options.procedure.call(context, content, sourceMap, function(error, content, sourceMap) {
+      if (error) {
+        context.callback(error);
+      } else {
+        context.callback(null, getResult(content), sourceMap);
+      }
+    }, options);
+
+    if (content == null) { // async mode
+      if (!context.async()) {
         throw new Error('Asynchronous mode is not allowed');
       }
-      options.procedure.call(context, content, sourceMap, function(error, content, sourceMap) {
-        if (error) {
-          asyncCb(error);
-        } else {
-          asyncCb(null, getResult(content), sourceMap);
-        }
-      }, options);
-      return null;
+      return undef;
     }
-    // sync mode
-    content = options.procedure.call(context, content, sourceMap, asyncCb, options);
   }
 
   return getResult(content);

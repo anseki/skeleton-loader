@@ -92,7 +92,6 @@ module.exports = {
   // skeleton-loader options
   skeletonLoader: {
     // Asynchronous mode
-    async: true,
     procedure: function(content, sourceMap, callback) {
       setTimeout(function() {
         callback(null, 'Edited: ' + content);
@@ -210,15 +209,13 @@ The content of the resource file as string, or something that is passed by previ
 - `sourceMap`  
 An optional value SourceMap as JavaScript object that might be passed by previous loader.
 - `callback`  
-See [`async`](#async) option.
+A callback function for asynchronous mode.
 - `options`  
 Reference to current options.
 
 In the function, `this` refers to the loader context. It has `resourcePath`, `query`, etc. See: http://webpack.github.io/docs/loaders.html#loader-context
 
-In synchronous mode (default), the function has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.
-
-In asynchronous mode, the function has to call the `callback` function with the content (see [`async`](#async) option). To return a SourceMap, the `callback` function must be called.
+In synchronous mode, the `procedure` function has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.
 
 For example:
 
@@ -249,17 +246,13 @@ module.exports = {
 };
 ```
 
-### `async`
-
-*Type:* boolean  
-*Default:* `false`
-
-If `true` is specified, the loader works as asynchronous mode, and a `callback` argument that is function is passed to the [`procedure`](#procedure) function. The `procedure` function has to call the `callback` function.
+If the `procedure` function returns nothing (or returns `undefined` or `null`), the loader works in asynchronous mode. To return a SourceMap, it must be asynchronous mode.  
+In asynchronous mode, the `procedure` function has to call the `callback` function when it finished.
 
 The `callback` function accepts the following arguments:
 
 - `error`  
-An error object when your procedure was failed, otherwise `null`.
+An error object, when your procedure failed.
 - `content`  
 The content that is output as JavaScript code, or passed to next loader if it is chained.
 - `sourceMap`  
@@ -274,7 +267,6 @@ module.exports = {
   // ...
   // skeleton-loader options
   skeletonLoader: {
-    async: true, // Asynchronous mode
     procedure: function(content, sourceMap, callback) {
       // Do something asynchronously.
       require('fs').readFile('data.txt', function(error, data) {
