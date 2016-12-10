@@ -22,17 +22,17 @@ module.exports = function(content, sourceMap) {
       if (!(asyncCb = context.async())) {
         throw new Error('Asynchronous mode is not allowed');
       }
-      options.procedure(content, sourceMap, function(error, content, sourceMap) {
+      options.procedure.call(context, content, sourceMap, function(error, content, sourceMap) {
         if (error) {
           asyncCb(error);
         } else {
           asyncCb(null, getResult(content), sourceMap);
         }
-      }, context, options);
+      }, options);
       return null;
     }
     // sync mode
-    content = options.procedure(content, sourceMap, asyncCb, context, options);
+    content = options.procedure.call(context, content, sourceMap, asyncCb, options);
   }
 
   return getResult(content);

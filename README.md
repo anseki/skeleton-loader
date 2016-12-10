@@ -211,12 +211,13 @@ The content of the resource file as string, or something that is passed by previ
 An optional value SourceMap as JavaScript object that might be passed by previous loader.
 - `callback`  
 See [`async`](#async) option.
-- `context`  
-See: http://webpack.github.io/docs/loaders.html#loader-context
 - `options`  
 Reference to current options.
 
-In synchronous mode (default), the function has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.  
+In the function, `this` refers to the loader context. It has `resourcePath`, `query`, etc. See: http://webpack.github.io/docs/loaders.html#loader-context
+
+In synchronous mode (default), the function has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.
+
 In asynchronous mode, the function has to call the `callback` function with the content (see [`async`](#async) option). To return a SourceMap, the `callback` function must be called.
 
 For example:
@@ -228,14 +229,14 @@ module.exports = {
   // ...
   // skeleton-loader options
   skeletonLoader: {
-    procedure: function(content, sourceMap, callback, context, options) {
+    procedure: function(content, sourceMap, callback, options) {
 
       // Do something with content.
       console.log('Size: ' + content.length);
       content = (content + '').replace(/foo/g, 'bar'); // content might be not string.
 
       // Check the resource file by using context.
-      if (context.resourcePath === '/abc/resource.js') {
+      if (this.resourcePath === '/abc/resource.js') {
 
         // Change current option.
         options.toCode = true;
