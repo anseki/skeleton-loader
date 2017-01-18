@@ -146,7 +146,7 @@ var data = require('skeleton-loader?toCode=true!./data.txt');
 
 ### `options` (webpack v2) or `skeletonLoader` (webpack v1)
 
-You can specify the options via a `options` (webpack v2) or `skeletonLoader` (webpack v1) object in webpack configuration.
+You can specify the options via an `options` (webpack v2) or `skeletonLoader` (webpack v1) object in webpack configuration.
 
 For example:
 
