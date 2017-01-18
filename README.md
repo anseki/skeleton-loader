@@ -16,9 +16,36 @@ skeleton-loader is useful when:
 
 For example:
 
+**webpack v2**
+
 ```js
 // webpack.config.js
+module.exports = {
+  entry: './app.js',
+  output: {
+    filename: 'bundle.js'
+  },
+  module: {
+    rules: [{
+      test: /\.js$/,
+      use: [{
+        loader: 'skeleton-loader',
+        options: {
+          procedure: function(content) {
+            // Change the input content, and output it.
+            return (content + '').replace(/foo/g, 'bar');
+          }
+        }
+      }]
+    }]
+  }
+};
+```
 
+**webpack v1**
+
+```js
+// webpack.config.js
 module.exports = {
   entry: './app.js',
   output: {
@@ -26,7 +53,7 @@ module.exports = {
   },
   module: {
     loaders: [
-      {test: /\.js$/, loader: 'skeleton'}
+      {test: /\.js$/, loader: 'skeleton-loader'}
     ]
   },
   // skeleton-loader options
@@ -41,64 +68,49 @@ module.exports = {
 
 ```js
 // webpack.config.js
-
-module.exports = {
-  // ...
-  module: {
-    loaders: [
-      {test: /\.html$/, loader: 'skeleton'}
-    ]
+// ...
+test: /\.html$/,
+// ...
+// skeleton-loader options
+{
+  procedure: function(content) {
+    // Remove all elements for testing from HTML.
+    return (content + '').replace(/<div class="test">[^]*?<\/div>/g, '');
   },
-  // skeleton-loader options
-  skeletonLoader: {
-    procedure: function(content) {
-      // Remove all elements for testing from HTML.
-      return (content + '').replace(/<div class="test">[^]*?<\/div>/g, '');
-    },
-    toCode: true
-  }
-};
+  toCode: true
+}
 ```
 
 ```js
 // webpack.config.js
-
-module.exports = {
-  // ...
-  module: {
-    loaders: [
-      {test: /\.json$/, loader: 'skeleton'}
-    ]
+// ...
+test: /\.json$/,
+// ...
+// skeleton-loader options
+{
+  procedure: function(content) {
+    var appConfig = JSON.parse(content);
+    // Check and change JSON.
+    console.log(appConfig.foo);
+    appConfig.bar = 'PUBLISH';
+    return appConfig;
   },
-  // skeleton-loader options
-  skeletonLoader: {
-    procedure: function(content) {
-      var appConfig = JSON.parse(content);
-      // Check and change JSON.
-      console.log(appConfig.foo);
-      appConfig.bar = 'PUBLISH';
-      return appConfig;
-    },
-    toCode: true
-  }
-};
+  toCode: true
+}
 ```
 
 ```js
 // webpack.config.js
-
-module.exports = {
-  // ...
-  // skeleton-loader options
-  skeletonLoader: {
-    // Asynchronous mode
-    procedure: function(content, sourceMap, callback) {
-      setTimeout(function() {
-        callback(null, 'Edited: ' + content);
-      }, 5000);
-    }
+// ...
+// skeleton-loader options
+{
+  // Asynchronous mode
+  procedure: function(content, sourceMap, callback) {
+    setTimeout(function() {
+      callback(null, 'Edited: ' + content);
+    }, 5000);
   }
-};
+}
 ```
 
 ## Installation
@@ -116,8 +128,8 @@ npm install --save-dev skeleton-loader
 There are three ways to specify [options](#options).
 
 * Query parameters
-* `skeletonLoader` object in webpack configuration
-* Specified property in webpack configuration
+* `options` (webpack v2) or `skeletonLoader` (webpack v1) object in webpack configuration
+* Specified property in webpack configuration (webpack v1)
 
 ### Query parameters
 
@@ -129,24 +141,46 @@ For example:
 
 ```js
 // app.js
-
-var data = require('skeleton?toCode=true!./data.txt');
+var data = require('skeleton-loader?toCode=true!./data.txt');
 ```
 
-### `skeletonLoader`
+### `options` (webpack v2) or `skeletonLoader` (webpack v1)
 
-You can specify the options via a `skeletonLoader` object in webpack configuration.
+You can specify the options via a `options` (webpack v2) or `skeletonLoader` (webpack v1) object in webpack configuration.
 
 For example:
 
+**webpack v2**
+
 ```js
 // webpack.config.js
+module.exports = {
+  // ...
+  module: {
+    rules: [{
+      test: /\.js$/,
+      use: [{
+        loader: 'skeleton-loader',
+        options: {
+          procedure: function(content) {
+            return (content + '').replace(/foo/g, 'bar');
+          }
+        }
+      }]
+    }]
+  }
+};
+```
 
+**webpack v1**
+
+```js
+// webpack.config.js
 module.exports = {
   // ...
   module: {
     loaders: [
-      {test: /\.js$/, loader: 'skeleton'}
+      {test: /\.js$/, loader: 'skeleton-loader'}
     ]
   },
   // skeleton-loader options
@@ -158,7 +192,7 @@ module.exports = {
 };
 ```
 
-### Specified property
+### Specified property (webpack v1)
 
 You can specify a name via a `config` query parameter, and you can specify the options via an object that has this name in webpack configuration.  
 This is useful for switching the options by each file or condition.
@@ -167,16 +201,14 @@ For example:
 
 ```js
 // app.js
-
 var
-  data1 = require('skeleton?config=optionsA!./file-1.js'),
-  data2 = require('skeleton?config=optionsB!./file-2.js');
+  data1 = require('skeleton-loader?config=optionsA!./file-1.js'),
+  data2 = require('skeleton-loader?config=optionsB!./file-2.js');
 // Or, you can specify these parameters in webpack configuration.
 ```
 
 ```js
 // webpack.config.js
-
 module.exports = {
   // ...
   // options-A
@@ -221,29 +253,26 @@ For example:
 
 ```js
 // webpack.config.js
+// ...
+// skeleton-loader options
+{
+  procedure: function(content, sourceMap, callback, options) {
 
-module.exports = {
-  // ...
-  // skeleton-loader options
-  skeletonLoader: {
-    procedure: function(content, sourceMap, callback, options) {
+    // Do something with content.
+    console.log('Size: ' + content.length);
+    content = (content + '').replace(/foo/g, 'bar'); // content might be not string.
 
-      // Do something with content.
-      console.log('Size: ' + content.length);
-      content = (content + '').replace(/foo/g, 'bar'); // content might be not string.
+    // Check the resource file by using context.
+    if (this.resourcePath === '/abc/resource.js') {
 
-      // Check the resource file by using context.
-      if (this.resourcePath === '/abc/resource.js') {
-
-        // Change current option.
-        options.toCode = true;
-      }
-
-      // Return the content to output.
-      return content;
+      // Change current option.
+      options.toCode = true;
     }
+
+    // Return the content to output.
+    return content;
   }
-};
+}
 ```
 
 If the `procedure` function returns nothing (or returns `undefined` or `null`), the loader works in asynchronous mode. To return a SourceMap, it must be asynchronous mode.  
@@ -262,25 +291,22 @@ For example:
 
 ```js
 // webpack.config.js
-
-module.exports = {
-  // ...
-  // skeleton-loader options
-  skeletonLoader: {
-    procedure: function(content, sourceMap, callback) {
-      // Do something asynchronously.
-      require('fs').readFile('data.txt', function(error, data) {
-        if (error) {
-          // Failed
-          callback(error);
-        } else {
-          // Done
-          callback(null, data + content);
-        }
-      });
-    }
+// ...
+// skeleton-loader options
+{
+  procedure: function(content, sourceMap, callback) {
+    // Do something asynchronously.
+    require('fs').readFile('data.txt', function(error, data) {
+      if (error) {
+        // Failed
+        callback(error);
+      } else {
+        // Done
+        callback(null, data + content);
+      }
+    });
   }
-};
+}
 ```
 
 ### `toCode`
@@ -294,20 +320,50 @@ If the loader is specified as not a final loader, this option is ignored (i.e. t
 
 For example:
 
+**webpack v2**
+
 ```js
 // webpack.config.js
+module.exports = {
+  // ...
+  module: {
+    rules: [
+      // HTML code is converted to JavaScript string.
+      // It works same as raw-loader.
+      {test: /\.html$/, use: [{loader: 'skeleton-loader?toCode=true'}]},
 
+      // JSON data is converted to JavaScript object.
+      // It works same as json-loader.
+      {
+        test: /\.json$/,
+        use: [{
+          loader: 'skeleton-loader',
+          options: {
+            procedure: function(content) { return JSON.parse(content); },
+            toCode: true
+          }
+        }]
+      }
+    ]
+  }
+};
+```
+
+**webpack v1**
+
+```js
+// webpack.config.js
 module.exports = {
   // ...
   module: {
     loaders: [
       // HTML code is converted to JavaScript string.
       // It works same as raw-loader.
-      {test: /\.html$/, loader: 'skeleton?toCode=true'},
+      {test: /\.html$/, loader: 'skeleton-loader?toCode=true'},
 
       // JSON data is converted to JavaScript object.
       // It works same as json-loader.
-      {test: /\.json$/, loader: 'skeleton?config=optJson'}
+      {test: /\.json$/, loader: 'skeleton-loader?config=optJson'}
     ]
   },
   optJson: {
@@ -319,7 +375,6 @@ module.exports = {
 
 ```js
 // app.js
-
 var html = require('file.html');
 element.innerHTML = html;
 

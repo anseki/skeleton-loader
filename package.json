@@ -1,6 +1,6 @@
 {
   "name": "skeleton-loader",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "title": "skeleton-loader",
   "description": "Loader module for webpack to execute your custom procedure. It works as your custom loader.",
   "keywords": [
