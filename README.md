@@ -1,5 +1,7 @@
 # skeleton-loader
 
+[![npm](https://img.shields.io/npm/v/skeleton-loader.svg)](https://www.npmjs.com/package/skeleton-loader) [![GitHub issues](https://img.shields.io/github/issues/anseki/skeleton-loader.svg)](https://github.com/anseki/skeleton-loader/issues) [![David](https://img.shields.io/david/anseki/skeleton-loader.svg)](package.json) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE-MIT)
+
 Loader module for [webpack](http://webpack.github.io/) to execute your custom procedure. It works as your custom loader.
 
 By default, skeleton-loader only outputs the input content. When you specify a function, skeleton-loader executes your function with the input content, and outputs its result. The function does something, it might edit the content, it might parse the content and indicate something in a console, it might do anything else.
