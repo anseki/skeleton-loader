@@ -15,10 +15,10 @@
     "modify"
   ],
   "dependencies": {
-    "loader-utils": "^0.2.16"
+    "loader-utils": "^1.0.2"
   },
   "devDependencies": {
-    "webpack": "^1.13.3"
+    "webpack": "^2.2.1"
   },
   "homepage": "https://github.com/anseki/skeleton-loader",
   "repository": {
