@@ -4,8 +4,8 @@ var loaderUtils = require('loader-utils');
 
 module.exports = function(content, sourceMap) {
   var context = this,
-    options = loaderUtils.getOptions ? loaderUtils.getOptions(context) :
-      loaderUtils.getLoaderConfig(context, 'skeletonLoader'),
+    options = (loaderUtils.getOptions ? loaderUtils.getOptions(context) :
+      loaderUtils.getLoaderConfig(context, 'skeletonLoader')) || {},
     undef;
 
   function getResult(content) {
