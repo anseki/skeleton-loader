@@ -245,7 +245,7 @@ An optional value SourceMap as JavaScript object that might be passed by previou
 - `callback`  
 A callback function for asynchronous mode.
 - `options`  
-Reference to current options.
+Reference to current options. Also, this might contain [`options.resourceOptions`](#optionsresourceoptions).
 
 In the function, `this` refers to the loader context. It has `resourcePath`, `query`, etc. See: http://webpack.github.io/docs/loaders.html#loader-context
 
@@ -310,6 +310,33 @@ For example:
   }
 }
 ```
+
+#### `options.resourceOptions`
+
+The `options` argument has `resourceOptions` property if a query string is specified with the resource file, and it is an object that is parsed query string.  
+This is useful for specifying additional parameters when importing the resource files. For example, you can specify the behavior with resource files.
+
+```js
+var
+  all = require('file.html'),
+  noHead = require('file.html?removeHead=yes'),;
+```
+
+```js
+// webpack.config.js
+// ...
+// skeleton-loader options
+{
+  procedure: function(content, sourceMap, callback, options) {
+    if (options.resourceOptions && options.resourceOptions.removeHead) {
+      content = content.replace(/<head[^]*?<\/head>/, ''); // Remove <head>
+    }
+    return content;
+  }
+}
+```
+
+The query string is parsed in the same way as [loader-utils](https://github.com/webpack/loader-utils#options-as-query-strings).
 
 ### `toCode`
 
