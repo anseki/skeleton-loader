@@ -22,7 +22,7 @@
     "loader-utils": "^1.1.0"
   },
   "devDependencies": {
-    "webpack": "^3.5.4"
+    "webpack": "^3.11.0"
   },
   "homepage": "https://github.com/anseki/skeleton-loader",
   "repository": {
