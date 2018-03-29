@@ -79,7 +79,7 @@ options: {
 // skeleton-loader options
 options: {
   // Asynchronous mode
-  procedure: function(content, sourceMap, callback) {
+  procedure: function(content, options, callback) {
     setTimeout(function() {
       callback(null, 'Edited: ' + content);
     }, 5000);
@@ -109,21 +109,41 @@ You can specify options via query parameters or an `options` (or `skeletonLoader
 *Type:* function  
 *Default:* `undefined`
 
-A function to do something with the input content. The result of the function is output.  
-The function is passed the following arguments:
+A function to do something with the input content. The result of the `procedure` is output.  
+The following arguments are passed to the `procedure`:
 
 - `content`  
-The content of the resource file as string, or something that is passed by previous loader. That is, if another loader is chained in `loaders` list, the `content` that is passed by that loader might not be string.
-- `sourceMap`  
-An optional value SourceMap as JavaScript object that might be passed by previous loader.
-- `callback`  
-A callback function for asynchronous mode.
+The content of the resource file as string, or something that is passed from previous loader. That is, if another loader is chained in `loaders` list, the `content` that is passed from that loader might not be string.
 - `options`  
-Reference to current options. Also, this might contain [`options.resourceOptions`](#optionsresourceoptions).
+Reference to current options. This might contain either or both of `sourceMap` and `meta` if those are passed from previous loader. Also, it might contain [`options.resourceOptions`](#optionsresourceoptions).
+- `callback`  
+A callback function for asynchronous mode. If the `procedure` doesn't receive the `callback`, the loader works in synchronous mode.
 
-In the function, `this` refers to the loader context. It has `resourcePath`, `query`, etc. See: https://webpack.js.org/api/loaders/#the-loader-context
+In the `procedure` function, `this` refers to the loader context. It has `resourcePath`, `query`, etc. See: https://webpack.js.org/api/loaders/#the-loader-context
 
-In synchronous mode, the `procedure` function has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.
+The result of the `procedure` can be any type such as `string`, `Object`, `null`, `undefined`, etc.  
+For example:
+
+```js
+// app.js
+var config = require('config.json');
+```
+
+```js
+// webpack.config.js
+// ...
+// skeleton-loader options
+options: {
+  procedure: function(config) {
+    if (initialize) {
+      return; // make config be undefined
+    }
+    return process.env.NODE_ENV === 'production' ? config : {name: 'DUMMY'}; // data for test
+  }
+}
+```
+
+In synchronous mode, the `procedure` has to return the content. The content is output as JavaScript code, or passed to next loader if it is chained.
 
 For example:
 
@@ -132,7 +152,7 @@ For example:
 // ...
 // skeleton-loader options
 options: {
-  procedure: function(content, sourceMap, callback, options) {
+  procedure: function(content, options) {
 
     // Do something with content.
     console.log('Size: ' + content.length);
@@ -151,17 +171,19 @@ options: {
 }
 ```
 
-If the `procedure` function returns nothing (or returns `undefined` or `null`), the loader works in asynchronous mode. To return a SourceMap, it must be asynchronous mode.  
-In asynchronous mode, the `procedure` function has to call the `callback` function when it finished.
+If the `procedure` receives the `callback`, the loader works in asynchronous mode. To return either or both of SourceMap and meta data, it must be asynchronous mode.  
+In asynchronous mode, the `procedure` has to call the `callback` when it finished.
 
-The `callback` function accepts the following arguments:
+The `callback` accepts the following arguments:
 
 - `error`  
 An error object, when your procedure failed.
 - `content`  
-The content that is output as JavaScript code, or passed to next loader if it is chained.
+The content that is output as JavaScript code, or passed to next loader if it is chained. This can be any type such as `string`, `Object`, `null`, `undefined`, etc.
 - `sourceMap`  
 An optional value SourceMap as JavaScript object that is output, or passed to next loader if it is chained.
+- `meta`  
+An optional value that can be anything and is output, or passed to next loader if it is chained.
 
 For example:
 
@@ -170,7 +192,7 @@ For example:
 // ...
 // skeleton-loader options
 options: {
-  procedure: function(content, sourceMap, callback) {
+  procedure: function(content, options, callback) { // Switches to asynchronous mode
     // Do something asynchronously.
     require('fs').readFile('data.txt', function(error, data) {
       if (error) {
@@ -201,7 +223,7 @@ var
 // ...
 // skeleton-loader options
 options: {
-  procedure: function(content, sourceMap, callback, options) {
+  procedure: function(content, options) {
     if (options.resourceOptions && options.resourceOptions.removeHead) {
       content = content.replace(/<head[^]*?<\/head>/, ''); // Remove <head>
     }
