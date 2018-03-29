@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-var": "off",
+    "prefer-arrow-callback": "off",
+    "no-unused-expressions": ["error", { "allowShortCircuit": true }]
+  }
+}

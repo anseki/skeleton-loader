@@ -14,8 +14,9 @@
     "content",
     "modify"
   ],
+  "main": "./lib/skeleton-loader.js",
   "files": [
-    "index.js"
+    "lib/*.js"
   ],
   "dependencies": {
     "loader-utils": "^1.1.0"
