@@ -4,13 +4,13 @@ const expect = require('chai').expect,
   sinon = require('sinon'),
   webpack = {
     cacheable: sinon.spy(),
+    async: sinon.spy(() => webpack.callback),
     callback: sinon.spy(function() {
       if (webpack.next) {
         const args = Array.from(arguments);
         setTimeout(() => { webpack.next.apply(null, args); }, 0);
       }
-    }),
-    async: sinon.spy(() => webpack.callback)
+    })
   },
   loader = require('../');
 
@@ -35,26 +35,33 @@ describe('flow for `procedure`', () => {
 
   describe('Synchronous mode', () => {
 
-    it('should return edited string', () => {
+    describe('should return edited string', () => {
+
       function procedure(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
         expect(options.meta).to.equal('<META>');
         return `${content}<procedure>`;
       }
 
-      resetAll({query: {procedure}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.equal('INPUT<procedure>');
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: false', () => {
+        resetAll({query: {procedure}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.equal('INPUT<procedure>');
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
 
-      resetAll({query: {procedure, toCode: true}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
-        .to.equal('module.exports = "INPUT<procedure>";');
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: true', () => {
+        resetAll({query: {procedure, toCode: true}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
+          .to.equal('module.exports = "INPUT<procedure>";');
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
+
     });
 
-    it('should return a value even if it is not string (Array)', () => {
+    describe('should return a value even if it is not string (Array)', () => {
+
       const passedValue = [1, 2, 3];
       function procedure(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
@@ -62,60 +69,78 @@ describe('flow for `procedure`', () => {
         return passedValue;
       }
 
-      resetAll({query: {procedure}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.equal(passedValue);
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: false', () => {
+        resetAll({query: {procedure}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.equal(passedValue);
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
 
-      resetAll({query: {procedure, toCode: true}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
-        .to.equal('module.exports = [1,2,3];');
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: true', () => {
+        resetAll({query: {procedure, toCode: true}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
+          .to.equal('module.exports = [1,2,3];');
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
+
     });
 
-    it('should return a value even if it is `null`', () => {
+    describe('should return a value even if it is `null`', () => {
+
       function procedure(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
         expect(options.meta).to.equal('<META>');
         return null;
       }
 
-      resetAll({query: {procedure}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.null;
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: false', () => {
+        resetAll({query: {procedure}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.null;
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
 
-      resetAll({query: {procedure, toCode: true}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
-        .to.equal('module.exports = null;');
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: true', () => {
+        resetAll({query: {procedure, toCode: true}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
+          .to.equal('module.exports = null;');
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
+
     });
 
-    it('should return a value even if it is `undefined`', () => {
+    describe('should return a value even if it is `undefined`', () => {
+
       function procedure(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
         expect(options.meta).to.equal('<META>');
       }
 
-      resetAll({query: {procedure}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined;
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: false', () => {
+        resetAll({query: {procedure}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined;
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
 
-      resetAll({query: {procedure, toCode: true}});
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
-        .to.equal('module.exports = undefined;');
-      expect(webpack.async.notCalled).to.be.true;
-      expect(webpack.callback.notCalled).to.be.true;
+      it('toCode: true', () => {
+        resetAll({query: {procedure, toCode: true}});
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>'))
+          .to.equal('module.exports = undefined;');
+        expect(webpack.async.notCalled).to.be.true;
+        expect(webpack.callback.notCalled).to.be.true;
+      });
+
     });
 
   });
 
   describe('Asynchronous mode', () => {
 
-    it('should return edited string', done => {
+    describe('should return edited string', () => {
+
       function procedureSync(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
         expect(options.meta).to.equal('<META>');
@@ -123,42 +148,52 @@ describe('flow for `procedure`', () => {
       }
 
       function procedure(content, options, procDone) {
-        procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        setTimeout(() => {
+          procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        }, 0);
         return 'DUMMY'; // This is not returned by loader
       }
 
-      resetAll({
-        query: {procedure},
-        next: (error, content, map, meta) => {
-          expect(error).to.be.null;
-          expect(map).to.equal('<MAP>');
-          expect(meta).to.equal('<META>');
-          expect(content).to.equal('INPUT<procedure>');
-          expect(webpack.async.calledOnce).to.be.true;
-          expect(webpack.callback.calledOnceWithExactly(
-            null, 'INPUT<procedure>', '<MAP>', '<META>')).to.be.true;
+      it('toCode: false', done => {
+        resetAll({
+          query: {procedure},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.equal('INPUT<procedure>');
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, 'INPUT<procedure>', '<MAP>', '<META>')).to.be.true;
 
-          resetAll({
-            query: {procedure, toCode: true},
-            next: (error, content, map, meta) => {
-              expect(error).to.be.null;
-              expect(map).to.equal('<MAP>');
-              expect(meta).to.equal('<META>');
-              expect(content).to.equal('module.exports = "INPUT<procedure>";');
-              expect(webpack.async.calledOnce).to.be.true;
-              expect(webpack.callback.calledOnceWithExactly(
-                null, 'module.exports = "INPUT<procedure>";', '<MAP>', '<META>')).to.be.true;
-
-              done();
-            }
-          });
-          expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
-        }
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
       });
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+
+      it('toCode: true', done => {
+        resetAll({
+          query: {procedure, toCode: true},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.equal('module.exports = "INPUT<procedure>";');
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, 'module.exports = "INPUT<procedure>";', '<MAP>', '<META>')).to.be.true;
+
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+      });
+
     });
 
-    it('should return a value even if it is not string (Array)', done => {
+    describe('should return a value even if it is not string (Array)', () => {
+
       const passedValue = [1, 2, 3];
       function procedureSync(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
@@ -167,42 +202,52 @@ describe('flow for `procedure`', () => {
       }
 
       function procedure(content, options, procDone) {
-        procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        setTimeout(() => {
+          procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        }, 0);
         return 'DUMMY'; // This is not returned by loader
       }
 
-      resetAll({
-        query: {procedure},
-        next: (error, content, map, meta) => {
-          expect(error).to.be.null;
-          expect(map).to.equal('<MAP>');
-          expect(meta).to.equal('<META>');
-          expect(content).to.equal(passedValue);
-          expect(webpack.async.calledOnce).to.be.true;
-          expect(webpack.callback.calledOnceWithExactly(
-            null, passedValue, '<MAP>', '<META>')).to.be.true;
+      it('toCode: false', done => {
+        resetAll({
+          query: {procedure},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.equal(passedValue);
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, passedValue, '<MAP>', '<META>')).to.be.true;
 
-          resetAll({
-            query: {procedure, toCode: true},
-            next: (error, content, map, meta) => {
-              expect(error).to.be.null;
-              expect(map).to.equal('<MAP>');
-              expect(meta).to.equal('<META>');
-              expect(content).to.equal('module.exports = [1,2,3];');
-              expect(webpack.async.calledOnce).to.be.true;
-              expect(webpack.callback.calledOnceWithExactly(
-                null, 'module.exports = [1,2,3];', '<MAP>', '<META>')).to.be.true;
-
-              done();
-            }
-          });
-          expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
-        }
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
       });
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+
+      it('toCode: true', done => {
+        resetAll({
+          query: {procedure, toCode: true},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.equal('module.exports = [1,2,3];');
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, 'module.exports = [1,2,3];', '<MAP>', '<META>')).to.be.true;
+
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+      });
+
     });
 
-    it('should return a value even if it is `null`', done => {
+    describe('should return a value even if it is `null`', () => {
+
       function procedureSync(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
         expect(options.meta).to.equal('<META>');
@@ -210,92 +255,116 @@ describe('flow for `procedure`', () => {
       }
 
       function procedure(content, options, procDone) {
-        procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        setTimeout(() => {
+          procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        }, 0);
         return 'DUMMY'; // This is not returned by loader
       }
 
-      resetAll({
-        query: {procedure},
-        next: (error, content, map, meta) => {
-          expect(error).to.be.null;
-          expect(map).to.equal('<MAP>');
-          expect(meta).to.equal('<META>');
-          expect(content).to.be.null;
-          expect(webpack.async.calledOnce).to.be.true;
-          expect(webpack.callback.calledOnceWithExactly(
-            null, null, '<MAP>', '<META>')).to.be.true;
+      it('toCode: false', done => {
+        resetAll({
+          query: {procedure},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.be.null;
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, null, '<MAP>', '<META>')).to.be.true;
 
-          resetAll({
-            query: {procedure, toCode: true},
-            next: (error, content, map, meta) => {
-              expect(error).to.be.null;
-              expect(map).to.equal('<MAP>');
-              expect(meta).to.equal('<META>');
-              expect(content).to.equal('module.exports = null;');
-              expect(webpack.async.calledOnce).to.be.true;
-              expect(webpack.callback.calledOnceWithExactly(
-                null, 'module.exports = null;', '<MAP>', '<META>')).to.be.true;
-
-              done();
-            }
-          });
-          expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
-        }
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
       });
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+
+      it('toCode: true', done => {
+        resetAll({
+          query: {procedure, toCode: true},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.equal('module.exports = null;');
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, 'module.exports = null;', '<MAP>', '<META>')).to.be.true;
+
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+      });
+
     });
 
-    it('should return a value even if it is `undefined`', done => {
+    describe('should return a value even if it is `undefined`', () => {
+
       function procedureSync(content, options) {
         expect(options.sourceMap).to.equal('<MAP>');
         expect(options.meta).to.equal('<META>');
       }
 
       function procedure(content, options, procDone) {
-        procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        setTimeout(() => {
+          procDone(null, procedureSync(content, options), options.sourceMap, options.meta);
+        }, 0);
         return 'DUMMY'; // This is not returned by loader
       }
 
-      resetAll({
-        query: {procedure},
-        next: (error, content, map, meta) => {
-          expect(error).to.be.null;
-          expect(map).to.equal('<MAP>');
-          expect(meta).to.equal('<META>');
-          expect(content).to.be.undefined;
-          expect(webpack.async.calledOnce).to.be.true;
-          expect(webpack.callback.calledOnceWithExactly(
-            null, void 0, '<MAP>', '<META>')).to.be.true;
+      it('toCode: false', done => {
+        resetAll({
+          query: {procedure},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.be.undefined;
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, void 0, '<MAP>', '<META>')).to.be.true;
 
-          resetAll({
-            query: {procedure, toCode: true},
-            next: (error, content, map, meta) => {
-              expect(error).to.be.null;
-              expect(map).to.equal('<MAP>');
-              expect(meta).to.equal('<META>');
-              expect(content).to.equal('module.exports = undefined;');
-              expect(webpack.async.calledOnce).to.be.true;
-              expect(webpack.callback.calledOnceWithExactly(
-                null, 'module.exports = undefined;', '<MAP>', '<META>')).to.be.true;
-
-              done();
-            }
-          });
-          expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
-        }
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
       });
-      expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+
+      it('toCode: true', done => {
+        resetAll({
+          query: {procedure, toCode: true},
+          next: (error, content, map, meta) => {
+            expect(error).to.be.null;
+            expect(content).to.equal('module.exports = undefined;');
+            expect(map).to.equal('<MAP>');
+            expect(meta).to.equal('<META>');
+            expect(webpack.async.calledOnce).to.be.true;
+            expect(webpack.callback.calledOnceWithExactly(
+              null, 'module.exports = undefined;', '<MAP>', '<META>')).to.be.true;
+
+            done();
+          }
+        });
+        expect(loader.call(webpack, 'INPUT', '<MAP>', '<META>')).to.be.undefined; // always undefined
+      });
+
     });
 
     it('should pass an error that was passed by procedure', done => {
       const error1 = new Error('error1');
       resetAll({
         query: {procedure: (content, options, procDone) => {
-          procDone(error1, `${content}<procedure>`);
+          setTimeout(() => {
+            procDone(error1, `${content}<procedure>`);
+          }, 0);
           return 'DUMMY'; // This is not returned by loader
         }},
-        next: error => {
+        next: (error, content, map, meta) => {
           expect(error).to.equal(error1);
+          expect(content).to.be.undefined;
+          expect(map).to.be.undefined;
+          expect(meta).to.be.undefined;
           expect(webpack.async.calledOnce).to.be.true;
           expect(webpack.callback.calledOnceWithExactly(error1)).to.be.true;
 
