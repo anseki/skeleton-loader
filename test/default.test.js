@@ -354,12 +354,14 @@ describe('flow for `procedure`', () => {
     it('should pass an error that was passed by procedure', done => {
       const error1 = new Error('error1');
       resetAll({
-        query: {procedure: (content, options, procDone) => {
-          setTimeout(() => {
-            procDone(error1, `${content}<procedure>`);
-          }, 0);
-          return 'DUMMY'; // This is not returned by loader
-        }},
+        query: {
+          procedure: (content, options, procDone) => {
+            setTimeout(() => {
+              procDone(error1, `${content}<procedure>`);
+            }, 0);
+            return 'DUMMY'; // This is not returned by loader
+          }
+        },
         next: (error, content, map, meta) => {
           expect(error).to.equal(error1);
           expect(content).to.be.undefined;
@@ -378,30 +380,30 @@ describe('flow for `procedure`', () => {
 
 });
 
-describe('options.toCode', () => {
-  const CONVERTED = 'module.exports = "INPUT<procedure>";',
-    NOT_CONVERTED = 'INPUT<procedure>';
+describe('converts output as code', () => {
+  const RES = 'INPUT<procedure>',
+    RES_CNV = `module.exports = "${RES}";`;
 
   function procedure(content) { return `${content}<procedure>`; }
 
   it('should not convert content when loaderIndex: 1 / toCode: false', () => {
     resetAll({loaderIndex: 1, query: {procedure, toCode: false}});
-    expect(loader.call(webpack, 'INPUT')).to.equal(NOT_CONVERTED);
+    expect(loader.call(webpack, 'INPUT')).to.equal(RES);
   });
 
   it('should not convert content when loaderIndex: 1 / toCode: true', () => {
     resetAll({loaderIndex: 1, query: {procedure, toCode: true}});
-    expect(loader.call(webpack, 'INPUT')).to.equal(NOT_CONVERTED);
+    expect(loader.call(webpack, 'INPUT')).to.equal(RES);
   });
 
   it('should not convert content when loaderIndex: 0 / toCode: false', () => {
     resetAll({loaderIndex: 0, query: {procedure, toCode: false}});
-    expect(loader.call(webpack, 'INPUT')).to.equal(NOT_CONVERTED);
+    expect(loader.call(webpack, 'INPUT')).to.equal(RES);
   });
 
   it('should convert content when loaderIndex: 0 / toCode: true', () => {
     resetAll({loaderIndex: 0, query: {procedure, toCode: true}});
-    expect(loader.call(webpack, 'INPUT')).to.equal(CONVERTED);
+    expect(loader.call(webpack, 'INPUT')).to.equal(RES_CNV);
   });
 
 });
@@ -409,22 +411,28 @@ describe('options.toCode', () => {
 describe('options.resourceOptions', () => {
 
   it('should not set options.resourceOptions when resourceQuery is not given', () => {
-    resetAll({query: {procedure: (content, options) => {
-      expect(options.hasOwnProperty('resourceOptions')).to.be.false;
-      return `${content}<procedure>`;
-    }}});
+    resetAll({
+      query: {
+        procedure: (content, options) => {
+          expect(options.hasOwnProperty('resourceOptions')).to.be.false;
+          return `${content}<procedure>`;
+        }
+      }
+    });
     expect(loader.call(webpack, 'INPUT')).to.equal('INPUT<procedure>');
   });
 
   it('should parse resourceQuery and set options.resourceOptions', () => {
     resetAll({
       resourceQuery: '?p1=v1&p2=v2',
-      query: {procedure: (content, options) => {
-        expect(options.hasOwnProperty('resourceOptions')).to.be.true;
-        expect(options.resourceOptions.p1).to.equal('v1');
-        expect(options.resourceOptions.p2).to.equal('v2');
-        return `${content}<procedure>`;
-      }}
+      query: {
+        procedure: (content, options) => {
+          expect(options.hasOwnProperty('resourceOptions')).to.be.true;
+          expect(options.resourceOptions.p1).to.equal('v1');
+          expect(options.resourceOptions.p2).to.equal('v2');
+          return `${content}<procedure>`;
+        }
+      }
     });
     expect(loader.call(webpack, 'INPUT')).to.equal('INPUT<procedure>');
   });
