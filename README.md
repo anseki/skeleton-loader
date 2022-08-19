@@ -1,6 +1,6 @@
 # skeleton-loader
 
-[![npm](https://img.shields.io/npm/v/skeleton-loader.svg)](https://www.npmjs.com/package/skeleton-loader) [![GitHub issues](https://img.shields.io/github/issues/anseki/skeleton-loader.svg)](https://github.com/anseki/skeleton-loader/issues) [![David](https://img.shields.io/david/anseki/skeleton-loader.svg)](package.json) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE-MIT)
+[![npm](https://img.shields.io/npm/v/skeleton-loader.svg)](https://www.npmjs.com/package/skeleton-loader) [![GitHub issues](https://img.shields.io/github/issues/anseki/skeleton-loader.svg)](https://github.com/anseki/skeleton-loader/issues) [![David](https://img.shields.io/david/anseki/skeleton-loader.svg)](package.json) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Loader module for [webpack](https://webpack.js.org/) to execute your custom procedure. It works as your custom loader.
 
