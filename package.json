@@ -19,7 +19,7 @@
     "lib/*.js"
   ],
   "dependencies": {
-    "loader-utils": "^1.1.0"
+    "loader-utils": "^1.4.2"
   },
   "devDependencies": {
     "chai": "^4.3.4",
